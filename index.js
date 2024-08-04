@@ -1,5 +1,5 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const { transcreverAudio } = require('./comandos');
+const { transcribeAudio } = require('./comandos');
 const { checkForNewMaterials } = require('./universidade');
 const qrcode = require('qrcode-terminal');
 
@@ -32,7 +32,7 @@ client.on('ready', async () => {
 // Listen for ALL received messages 
 client.on('message_create', async (message) => {
     if (message.type == 'ptt'){
-        transcreverAudio(client, message);
+        transcribeAudio(client, message);
     }
 });
 
