@@ -7,14 +7,12 @@ require('dotenv').config();
 
 const CLIENT_ID = process.env.CLIENT_ID;
 
-
 // Implementation of decorators for commands
 const commands = {};
 
 function registerCommand(command, callback) {
     commands[command] = callback;
 }
-
 
 // Initialize WhatsApp client with local authentication
 const client = new Client({
@@ -37,7 +35,6 @@ client.on('ready', async () => {
         checkForNewMaterials(client);
     }, 60000);
 });
-
 
 // Listen for ALL received messages 
 client.on('message_create', async (message) => {
@@ -62,7 +59,8 @@ registerCommand('!transcrever', async (message, args) => {
     const quotedMessage = await message.getQuotedMessage();
 
     if (['ptt', 'audio'].includes(quotedMessage.type)) {
-        return transcribeAudio(client, quotedMessage);
+        message.react('⌛');
+        return await transcribeAudio(client, message, quotedMessage);
     } 
 
     return await message.reply(`Essa não é uma mensagem de *áudio*.`);

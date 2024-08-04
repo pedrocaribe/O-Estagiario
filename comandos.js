@@ -35,17 +35,17 @@ async function transcribeWithWhisper(audioFilePath) {
 }
 
 // Function to transcribe audio
-async function transcribeAudio(client, message) {
+async function transcribeAudio(client, originalMessage, quotedMessage) {
     const tempDir = path.resolve(__dirname, 'temp');
 
-    // Checks is 'temp' directory exists, if not, create it
+    // Checks if 'temp' directory exists, if not, create it
     if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
     }
 
-    const media = await message.downloadMedia();
+    const media = await quotedMessage.downloadMedia();
     if (media) {
-        const audioFileName = `${message.id._serialized}.ogg`;
+        const audioFileName = `${quotedMessage.id._serialized}.ogg`;
         const audioFilePath = path.resolve(tempDir, audioFileName);
 
         // Saves audio files temporarily
@@ -54,17 +54,18 @@ async function transcribeAudio(client, message) {
         try {
             // Audio transcription using Whisper
             const transcription = await transcribeWithWhisper(audioFilePath);
-            const chatId = message.from;
+            const chatId = quotedMessage.from;
             const grupoId = PRIVATE_CHAT_ID;
 
             // Reply to user's message with transcription
-            await message.reply(`_*Transcrição de Áudio Automática*_\n\n${transcription}`);
+            await quotedMessage.reply(`_*Transcrição de Áudio Automática*_\n\n${transcription}`);
+            await originalMessage.react('✅');
 
             // Send notification to myself due to Bot reading the mesage and not allowing WhatsApp device to notify
             // Notification is only sent if audio was not sent by myself
 
             if (chatId !== MY_CHAT_ID){
-                await client.sendMessage(grupoId, `*O Estagiário realizou uma transcrição do contato ${message.author}*`);
+                await client.sendMessage(grupoId, `*O Estagiário realizou uma transcrição do contato ${quotedMessage.author}*\nSolicitada por ${originalMessage.author}`);
                 // Mark message/group as unread
                 const chat = await client.getChatById(chatId);
                 await chat.markUnread();
