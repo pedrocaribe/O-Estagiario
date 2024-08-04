@@ -101,7 +101,7 @@ async function checkForNewMaterials(client) {
                 const downloadDir = path.resolve(GOOGLE_DRIVE_FOLDER, courseName);
                 const filePath = path.resolve(downloadDir, `${material.fileName}.${material.fileExtension}`);
 
-                // Checks for folder path existence
+                // Checks for folder path existence, if not, create it
                 if (!fs.existsSync(downloadDir)) {
                     fs.mkdirSync(downloadDir, { recursive: true });
                 }
