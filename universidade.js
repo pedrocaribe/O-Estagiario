@@ -136,5 +136,5 @@ async function checkForNewMaterials(client) {
     }
 }
 
-// Exporta a função para ser usada em outro lugar
+// Export function to be used in other files
 module.exports = { checkForNewMaterials };
