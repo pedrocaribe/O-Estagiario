@@ -1,0 +1,19 @@
+{
+  "name": "unisanta-scavenger",
+  "version": "1.0.0",
+  "description": "",
+  "main": "scavenger_faster.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.3",
+    "dotenv": "^16.4.5",
+    "puppeteer": "^22.15.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.25.0"
+  }
+}

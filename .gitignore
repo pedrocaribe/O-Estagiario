@@ -1,0 +1,7 @@
+.env
+.wwebjs_auth/
+.wwebjs_cache/
+temp/
+whatsapp_session/
+error.png
+node_modules/
