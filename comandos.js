@@ -58,7 +58,7 @@ async function transcribeAudio(client, message) {
             const grupoId = PRIVATE_CHAT_ID;
 
             // Reply to user's message with transcription
-            await message.reply(`_*Transcrição de Áudio Automática*_\n${transcription}`);
+            await message.reply(`_*Transcrição de Áudio Automática*_\n\n${transcription}`);
 
             // Send notification to myself due to Bot reading the mesage and not allowing WhatsApp device to notify
             // Notification is only sent if audio was not sent by myself
