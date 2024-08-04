@@ -14,6 +14,14 @@ function registerCommand(command, callback) {
     commands[command] = callback;
 }
 
+// Added loop function to handle interval better, without risking new window to be opened in parallel
+async function executeInLoop(client) {
+    while(true) {
+        await checkForNewMaterials(client);
+        await new Promise(resolve => setTimeout(resolve, 10000));
+    }
+}
+
 // Initialize WhatsApp client with local authentication
 const client = new Client({
     authStrategy: new LocalAuth({ clientId: `${CLIENT_ID}` }),
@@ -31,9 +39,7 @@ client.on('ready', async () => {
     console.log('Estagiário está pronto para trabalhar!');
 
     // Begin new courseware verification every 60 seconds 
-    setInterval(() => {
-        checkForNewMaterials(client);
-    }, 60000);
+    executeInLoop(client);
 });
 
 // Listen for ALL received messages 
