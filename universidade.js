@@ -1,8 +1,6 @@
-const axios = require('axios');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 
 require('dotenv').config();
@@ -16,25 +14,25 @@ const GOOGLE_DRIVE_FOLDER = process.env.GOOGLE_DRIVE_FOLDER;
 // Function to send WhatsApp message
 async function sendWhatsAppMessage(client, subjectName, fileName, filePath) {
     const chatId = PRIVATE_CHAT_ID;
-    const message = `Novo arquivo postado para ${subjectName}: ${fileName}`;
+    const message = `_*Novo arquivo postado*_ \n\n*${subjectName}*\n\n${fileName}`;
     await client.sendMessage(chatId, message);
 
     // Send file as a Document
     const media = MessageMedia.fromFilePath(filePath);
-    await client.sendMessage(chatId, media, { sendMediaAsDocument: true });
+
+    // Added try/catch to avoid issues
+    try {
+        await client.sendMessage(chatId, media, { sendMediaAsDocument: true });
+    }
+    catch (error) {
+        console.log('Falha ao enviar mensagem', error);
+    }
 }
 
 // Function to check if there are new files in University portal
 async function checkForNewMaterials(client) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
-
-    // Configure axios instance to ignore invalid SSL certificates
-    const axiosInstance = axios.create({
-        httpsAgent: new https.Agent({
-            rejectUnauthorized: false
-        })
-    });
 
     try {
         // Access University login page
@@ -110,8 +108,26 @@ async function checkForNewMaterials(client) {
                 if (!fs.existsSync(filePath)) {
                     try {
                         console.log(`Baixando ${material.fileName}.${material.fileExtension}`);
-                        const response = await axiosInstance.get(material.url, { responseType: 'arraybuffer' });
-                        fs.writeFileSync(filePath, response.data);
+                        
+                        // Create CDP to set download location
+                        const pageCDP = await page.target().createCDPSession();
+                        await pageCDP.send('Page.setDownloadBehavior', {
+                            behavior: 'allow',
+                            downloadPath: downloadDir,
+                        });
+
+                        // Use same tab to navigate to download tab
+                        await page.evaluate((link) => {
+                            location.href = link;
+                        }, material.url);
+
+                        // Check for download completion
+                        let downloadStarted = false;
+                        while (!downloadStarted) {
+                            downloadStarted = fs.existsSync(filePath);
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+
                         console.log(`Download de ${material.fileName}.${material.fileExtension} concluído.`);
 
                         // Send WhatsApp message after Download
