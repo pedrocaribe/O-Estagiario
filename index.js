@@ -10,8 +10,16 @@ const CLIENT_ID = process.env.CLIENT_ID;
 // Implementation of decorators for commands
 const commands = {};
 
-function registerCommand(command, callback) {
-    commands[command] = callback;
+// Register command and/or aliases
+function registerCommand(commandOrCommands, callback) {
+
+    if (Array.isArray(commandOrCommands)) {
+        commandOrCommands.forEach(command => {
+            commands[command.toLowerCase()] = callback;
+    });
+    } else {
+        commands[commandOrCommands.toLowerCase()] = callback;
+    }
 }
 
 // Added loop function to handle interval better, without risking new window to be opened in parallel
@@ -57,7 +65,7 @@ client.on('message_create', async (message) => {
 });
 
 // Register the '!transcrever' command manually
-registerCommand('!transcrever', async (message, args) => {
+registerCommand(['!transcrever', '!tc', '!transc'], async (message, args) => {
     if (!message.hasQuotedMsg) {
         return await message.reply("Você tem que responder ao *áudio* com o comando _*!transcrever*_");
     }
