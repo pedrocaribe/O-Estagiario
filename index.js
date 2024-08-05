@@ -8,25 +8,37 @@ require('dotenv').config();
 const CLIENT_ID = process.env.CLIENT_ID;
 
 // Implementation of decorators for commands
-const commands = {};
+const commands = [];
+
+// Character used to issue commands
+const commandPrefix = '!';
+
+class Command {
+    constructor(name, aliases=[], description='', callback) {
+        this.name = name;
+        this.aliases = aliases;
+        this.description = description;
+        this.callback = callback;
+    }
+}
 
 // Register command and/or aliases
-function registerCommand(commandOrCommands, callback) {
-
-    if (Array.isArray(commandOrCommands)) {
-        commandOrCommands.forEach(command => {
-            commands[command.toLowerCase()] = callback;
-    });
-    } else {
-        commands[commandOrCommands.toLowerCase()] = callback;
+function registerCommand(name, aliases=[], description='', callback) {
+    const newCommand = new Command(name=name, aliases=aliases, description=description, callback=callback)
+    if (aliases) {
+        newCommand.aliases = aliases;
     }
+    if (description) {
+        newCommand.description = description;
+    }
+    commands.push(newCommand);
 }
 
 // Added loop function to handle interval better, without risking new window to be opened in parallel
 async function executeInLoop(client) {
     while(true) {
         await checkForNewMaterials(client);
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        await new Promise(resolve => setTimeout(resolve, 300_000));
     }
 }
 
@@ -52,33 +64,71 @@ client.on('ready', async () => {
 
 // Listen for ALL received messages 
 client.on('message_create', async (message) => {
-    const args = message.body.trim().split(/ +/);
-    const commandName = args.shift().toLowerCase();
+    if(message.body.startsWith(commandPrefix)){
+        const args = message.body.trim().split(/ +/);
+        const commandName = args[0].split(commandPrefix).pop();
 
-    if (commands[commandName]) {
+        const foundCommand = commands.find(command => command.name == commandName || command.aliases.includes(commandName));
+
+        if (!foundCommand) {
+            return await message.reply('Comando não encontrado!')
+        }
+
         try {
-            await commands[commandName](message, args);
+            await foundCommand.callback(message, args);
         } catch (error) {
-            console.error(`Erro ao executar comando ${commandName}:`, error);
+                console.error(`Erro ao executar comando ${commandName}:`, error);
         }
     }
 });
 
-// Register the '!transcrever' command manually
-registerCommand(['!transcrever', '!tc', '!transc'], async (message, args) => {
-    if (!message.hasQuotedMsg) {
-        return await message.reply("Você tem que responder ao *áudio* com o comando _*!transcrever*_");
-    }
+registerCommand(
+    name='transcrever', 
+    aliases=['tc', 'transc'], 
+    description='Transcreve um áudio ou mensagem de voz. Uso: Responda a mensagem contendo o áudio inserindo o comando',
+    callback= async (message, args) => {
+        if (!message.hasQuotedMsg) {
+            return await message.reply("Você tem que responder ao *áudio* com o comando _*!transcrever*_");
+        }
 
-    const quotedMessage = await message.getQuotedMessage();
+        const quotedMessage = await message.getQuotedMessage();
 
-    if (['ptt', 'audio'].includes(quotedMessage.type)) {
-        message.react('⌛');
-        return await transcribeAudio(client, message, quotedMessage);
-    } 
+        if (['ptt', 'audio'].includes(quotedMessage.type)) {
+            message.react('⌛');
+            return await transcribeAudio(client, message, quotedMessage);
+        } 
 
-    return await message.reply(`Essa não é uma mensagem de *áudio*.`);
+        return await message.reply(`Essa não é uma mensagem de *áudio*.`);
 });
+
+registerCommand(
+    name='help', 
+    aliases=['ajuda'],
+    description='Exibe todos os comandos disponíveis e suas descrições.',
+    callback= async (message, args) => {
+        let helpMessage = '📜 *Lista de Comandos Disponíveis:*\n\n';
+
+        commands.forEach(command => {
+            // Command name
+            helpMessage += `*${commandPrefix}${command.name}*\n`;
+            
+            // Add aliases, if existant
+            if (command.aliases.length > 0) {
+                helpMessage += `_Aliases:_ ${command.aliases.map(alias => `${commandPrefix}${alias}`).join(', ')}\n`;
+            }
+            
+            // Add description, if existant
+            if (command.description) {
+                helpMessage += `_Descrição:_ ${command.description}\n`;
+            }
+
+            // Separate commands
+            helpMessage += '\n';
+        });
+
+        await message.reply(helpMessage);
+    });
+
 
 // Initialize WhatsApp client
 client.initialize();
