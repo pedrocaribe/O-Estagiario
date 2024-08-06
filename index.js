@@ -12,6 +12,7 @@ const commands = [];
 
 // Character used to issue commands
 const commandPrefix = '!';
+const REFRESH_INTERVAL = 300_000;
 
 class Command {
     constructor(name, aliases=[], description='', callback) {
@@ -38,7 +39,7 @@ function registerCommand(name, aliases=[], description='', callback) {
 async function executeInLoop(client) {
     while(true) {
         await checkForNewMaterials(client);
-        await new Promise(resolve => setTimeout(resolve, 300_000));
+        await new Promise(resolve => setTimeout(resolve, REFRESH_INTERVAL));
     }
 }
 
@@ -64,6 +65,7 @@ client.on('ready', async () => {
 
 // Listen for ALL received messages 
 client.on('message_create', async (message) => {
+    
     if(message.body.startsWith(commandPrefix)){
         const args = message.body.trim().split(/ +/);
         const commandName = args[0].split(commandPrefix).pop();
