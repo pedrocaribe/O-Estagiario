@@ -1,5 +1,5 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const { transcribeAudio } = require('./comandos');
+const { transcribeAudio } = require('./transcription');
 const { checkForNewMaterials } = require('./universidade');
 const qrcode = require('qrcode-terminal');
 
@@ -65,7 +65,7 @@ client.on('ready', async () => {
 
 // Listen for ALL received messages 
 client.on('message_create', async (message) => {
-    
+
     if(message.body.startsWith(commandPrefix)){
         const args = message.body.trim().split(/ +/);
         const commandName = args[0].split(commandPrefix).pop();
