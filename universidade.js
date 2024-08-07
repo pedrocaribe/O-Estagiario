@@ -9,7 +9,7 @@ const PRIVATE_CHAT_ID = process.env.PRIVATE_CHAT_ID;
 const UNISANTA_URL = process.env.UNISANTA_URL;
 const USER_RA = process.env.USER_RA;
 const USER_PASS = process.env.USER_PASS;
-const GOOGLE_DRIVE_FOLDER = process.env.GOOGLE_DRIVE_FOLDER;
+const MY_FOLDER = process.env.MY_FOLDER;
 
 // Function to send WhatsApp message
 async function sendWhatsAppMessage(client, subjectName, fileName, filePath) {
@@ -96,7 +96,7 @@ async function checkForNewMaterials(client) {
 
             // Iterate through all files and checks for duplicate, saves to Google Drive and Send as WhatsApp message
             for (let material of courseware) {
-                const downloadDir = path.resolve(GOOGLE_DRIVE_FOLDER, courseName);
+                const downloadDir = path.resolve(MY_FOLDER, courseName);
                 const filePath = path.resolve(downloadDir, `${material.fileName}.${material.fileExtension}`);
 
                 // Checks for folder path existence, if not, create it
