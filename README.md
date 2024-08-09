@@ -1,6 +1,6 @@
-# O Estagiário
+# O Mensageiro
 
-O Estagiário is a Node.js-based automation bot designed to assist with university tasks and WhatsApp management. The bot automates the process of downloading new study materials from a university portal, organizes them in Google Drive, and sends notifications and files to a designated WhatsApp group. Additionally, the bot transcribes voice messages received in WhatsApp chats using the Whisper transcription service, automatically replying with the transcription and sending notifications to the bot owner.
+O Mensageiro is a Node.js-based automation bot designed to assist with university tasks and WhatsApp management. The bot automates the process of downloading new study materials from a university portal, organizes them in Google Drive, and sends notifications and files to a designated WhatsApp group. Additionally, the bot transcribes voice messages received in WhatsApp chats using the Whisper transcription service, automatically replying with the transcription and sending notifications to the bot owner.
 
 ## Features
 
@@ -15,8 +15,8 @@ O Estagiário is a Node.js-based automation bot designed to assist with universi
 Clone this repository to your local machine:
 
 ```bash
-git clone git@github.com:yourusername/O-Estagiario.git
-cd O-Estagiario
+git clone git@github.com:yourusername/O-Mensageiro.git
+cd O-Mensageiro
 Install the required dependencies:
 ```
 
