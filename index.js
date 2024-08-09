@@ -12,7 +12,7 @@ const commands = [];
 
 // Character used to issue commands
 const commandPrefix = '!';
-const REFRESH_INTERVAL = 300_000;
+const REFRESH_INTERVAL = 3e6;
 
 class Command {
     constructor(name, aliases=[], description='', callback) {
